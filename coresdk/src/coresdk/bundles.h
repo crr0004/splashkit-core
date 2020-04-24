@@ -135,5 +135,5 @@ namespace splashkit_lib
 
     void free_all_resource_bundles();
 
-#endif /* bundles_hpp */
 }
+#endif /* bundles_hpp */
