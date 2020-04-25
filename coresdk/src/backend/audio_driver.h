@@ -30,6 +30,8 @@ namespace splashkit_lib
 
         // private data used by backend
         void * _data;
+        int openal_id;
+        int openal_source_id;
     } sk_sound_data;
 
 
@@ -37,6 +39,7 @@ namespace splashkit_lib
     void sk_open_audio();
     void sk_close_audio();
     bool sk_audio_is_open();
+    int sk_audio_get_last_error();
 
     int sk_get_channel(sk_sound_data *sound);
 
