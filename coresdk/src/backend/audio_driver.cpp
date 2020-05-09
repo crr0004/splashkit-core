@@ -149,6 +149,8 @@ namespace splashkit_lib
         alcMakeContextCurrent(NULL);
         alcDestroyContext(ctx);
         alcCloseDevice(device);
+
+        _sk_audio_open = false;
     }
 
     void format_av_error(int ret)
@@ -330,6 +332,17 @@ namespace splashkit_lib
         return buffer;
     }
 
+    ALint openal_get_source_state(ALuint source){
+        if (source > 0)
+        {
+            ALint sourceState;
+            alGetSourcei(source, AL_SOURCE_STATE, &sourceState);
+            return sourceState;
+        }else{
+            return -1;
+        }
+    }
+
     ALuint openal_play_sound(ALuint buffer)
     {
         ALuint source = 0;
@@ -424,9 +437,12 @@ namespace splashkit_lib
     sk_sound_data sk_load_sound_data(string filename, sk_sound_kind kind)
     {
         internal_sk_init();
-        sk_sound_data result = { SGSD_UNKNOWN, nullptr } ;
+        sk_sound_data result;
 
         result.kind = kind;
+        result._data = nullptr;
+        result.openal_id = 0;
+        result.openal_source_id = 0;
 
         switch (kind)
         {
@@ -480,7 +496,14 @@ namespace splashkit_lib
             case SGSD_MUSIC:
                 delete (const uint8_t*)sound->_data;
                 sound->_data = nullptr;
+                if(sound->openal_source_id > 0){
+                    alSourceStop(sound->openal_source_id);
+                    alSourcei(sound->openal_source_id, AL_BUFFER, 0);
+                }
                 alDeleteBuffers(1, (const ALuint*)&sound->openal_id);
+                alDeleteSources(1, (const ALuint*)&sound->openal_source_id);
+                sound->openal_id = 0;
+                sound->openal_source_id = 0;
                 break;
 
             case SGSD_SOUND_EFFECT:
@@ -549,7 +572,7 @@ namespace splashkit_lib
             }
             case SGSD_MUSIC:
             {
-                if ( _current_music == sound && Mix_PlayingMusic() ) return 1.0f;
+                if ( _current_music == sound && openal_get_source_state(sound->openal_source_id) == AL_PLAYING ) return 1.0f;
                 break;
             }
 
@@ -633,13 +656,27 @@ namespace splashkit_lib
     void sk_set_music_vol(float vol)
     {
         internal_sk_init();
-        Mix_VolumeMusic( static_cast<int>(MIX_MAX_VOLUME * vol) );
+        sk_sound_data *sound = _current_music;
+        if (
+            sound != nullptr &&
+            sound->openal_source_id > 0)
+        {
+            alSourcef(sound->openal_source_id, AL_GAIN, vol);
+        }
     }
 
     float sk_music_vol()
     {
         internal_sk_init();
-        return Mix_VolumeMusic(-1) / static_cast<float>(MIX_MAX_VOLUME);
+        sk_sound_data *sound = _current_music;
+        ALfloat vol = 0;
+        if (
+            sound != nullptr &&
+            sound->openal_source_id > 0)
+        {
+            alGetSourcef(sound->openal_source_id, AL_GAIN, &vol);
+        }
+        return vol;
     }
 
     float sk_sound_volume(sk_sound_data *sound)
@@ -679,26 +716,42 @@ namespace splashkit_lib
                 break;
         }
     }
+
     
     void sk_pause_music()
     {
         internal_sk_init();
-        Mix_PauseMusic();
+        sk_sound_data *sound = _current_music;
+        if (
+            sound != nullptr &&
+            sound->openal_source_id > 0 &&
+            openal_get_source_state(sound->openal_source_id) == AL_PLAYING)
+        {
+            alSourcePause(sound->openal_source_id);
+        }
     }
     
     void sk_resume_music()
     {
         internal_sk_init();
-        if ( Mix_PausedMusic() )
+        sk_sound_data *sound = _current_music;
+        // Check if we are paused before we try to resume
+        if (
+            sound != nullptr &&
+            sound->openal_source_id > 0 &&
+            openal_get_source_state(sound->openal_source_id) == AL_PAUSED)
         {
-            Mix_ResumeMusic();
+            alSourcePlay(sound->openal_source_id);
         }
     }
     
     void sk_stop_music()
     {
         internal_sk_init();
-        Mix_HaltMusic();
+        sk_sound_data *sound = _current_music;
+        if(sound != nullptr && sound->openal_source_id > 0){
+            alSourceStop(sound->openal_source_id);
+        }
     }
     
     void sk_stop_sound(sk_sound_data *sound)
@@ -731,7 +784,7 @@ namespace splashkit_lib
     bool sk_music_playing()
     {
         internal_sk_init();
-        if ( Mix_PlayingMusic() ) {
+        if (_current_music != nullptr && _current_music->openal_source_id > 0 && openal_get_source_state(_current_music->openal_source_id) == AL_PLAYING) {
             return true;
         }
         else
