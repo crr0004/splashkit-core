@@ -39,7 +39,7 @@ using std::endl;
 #define SG_MAX_CHANNELS 64
 namespace splashkit_lib
 {
-    static Mix_Chunk * _sk_sound_channels[SG_MAX_CHANNELS];
+    static void* _sk_sound_channels[SG_MAX_CHANNELS];
     static sk_sound_data * _current_music  = nullptr;
 
     // Any error bits that get set by libraries
@@ -94,12 +94,21 @@ namespace splashkit_lib
             return;
         }
 
+        
+
         const ALCchar *name;
         if (alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
             name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
         if (!name || alcGetError(device) != AL_NO_ERROR)
             name = alcGetString(device, ALC_DEVICE_SPECIFIER);
         printf("Opened \"%s\"\n", name);
+    }
+
+    int* sk_get_device_attributes(int* size){
+        alcGetIntegerv(device, ALC_ATTRIBUTES_SIZE, 1, size);
+        ALCint* attrs = new ALCint[*size];
+        alcGetIntegerv(device, ALC_ALL_ATTRIBUTES, *size, &attrs[0]);
+        return attrs;
     }
 
     bool sk_audio_is_open()
@@ -444,26 +453,10 @@ namespace splashkit_lib
         result.openal_id = 0;
         result.openal_source_id = 0;
 
-        switch (kind)
-        {
-            case SGSD_SOUND_EFFECT:
-            {
-                result._data = Mix_LoadWAV(filename.c_str());
-                break;
-            }
-            case SGSD_MUSIC:
-            {
-                result._data = read_audio_into_buffer(
-                    filename.c_str(),
-                    &(result.openal_id)
-                );
-                break;
-            }
-
-            case SGSD_UNKNOWN:
-            default:
-                return result;
-        }
+        result._data = read_audio_into_buffer(
+            filename.c_str(),
+            &(result.openal_id)
+        );
 
         if(result._data == nullptr)
         {
@@ -477,46 +470,25 @@ namespace splashkit_lib
     {
         if ( (!sound) || (!sound->_data) ) return -1;
 
-        for (int i = 0; i < SG_MAX_CHANNELS; i++)
-        {
-            if ( _sk_sound_channels[i] == sound->_data && Mix_Playing(i) )
-            {
-                return i;
-            }
-        }
-        return -1;
+
+        return sound->openal_source_id;
     }
 
     void sk_close_sound_data(sk_sound_data * sound )
     {
         if ( (!sound) || (!sound->_data) ) return;
 
-        switch (sound->kind)
+        delete (const uint8_t *)sound->_data;
+        sound->_data = nullptr;
+        if (sound->openal_source_id > 0)
         {
-            case SGSD_MUSIC:
-                delete (const uint8_t*)sound->_data;
-                sound->_data = nullptr;
-                if(sound->openal_source_id > 0){
-                    alSourceStop(sound->openal_source_id);
-                    alSourcei(sound->openal_source_id, AL_BUFFER, 0);
-                }
-                alDeleteBuffers(1, (const ALuint*)&sound->openal_id);
-                alDeleteSources(1, (const ALuint*)&sound->openal_source_id);
-                sound->openal_id = 0;
-                sound->openal_source_id = 0;
-                break;
-
-            case SGSD_SOUND_EFFECT:
-                if (_current_music == sound)
-                {
-                    _current_music = nullptr;
-                }
-                Mix_FreeChunk(static_cast<Mix_Chunk *>(sound->_data));
-                break;
-
-            case SGSD_UNKNOWN:
-                break;
+            alSourceStop(sound->openal_source_id);
+            alSourcei(sound->openal_source_id, AL_BUFFER, 0);
         }
+        alDeleteBuffers(1, (const ALuint *)&sound->openal_id);
+        alDeleteSources(1, (const ALuint *)&sound->openal_source_id);
+        sound->openal_id = 0;
+        sound->openal_source_id = 0;
 
         sound->kind = SGSD_UNKNOWN;
         sound->_data = nullptr;
@@ -528,57 +500,20 @@ namespace splashkit_lib
     {
         if ( (!sound) || (!sound->_data) ) return;
 
-        switch (sound->kind)
-        {
-            case SGSD_SOUND_EFFECT:
-            {
-                Mix_Chunk *effect = static_cast<Mix_Chunk *>(sound->_data);
-                int channel = Mix_PlayChannel( -1, effect, loops);
-                if (channel >= 0 && channel < SG_MAX_CHANNELS)
-                {
-                    Mix_Volume(channel, static_cast<int>(volume * MIX_MAX_VOLUME));
-                    _sk_sound_channels[channel] = effect;   // record which channel is playing the effect
-                }
-                break;
-            }
-            case SGSD_MUSIC:
-            {
-                // Mix_PlayMusic(static_cast<Mix_Music *>(sound->_data), loops);
-                // Mix_VolumeMusic(static_cast<int>(MIX_MAX_VOLUME * volume));
-
-                sound->openal_source_id = openal_play_sound(
-                    sound->openal_id
-                ); 
-                _current_music = sound;
-                break;
-            }
-            case SGSD_UNKNOWN:
-                break;
-        }
+        sound->openal_source_id = openal_play_sound(
+            sound->openal_id);
+        sk_set_music_vol(volume);
+        _current_music = sound;
     }
 
-    float sk_sound_playing(sk_sound_data * sound)
+    float sk_sound_playing(sk_sound_data *sound)
     {
-        if ( ! sound ) {
+        if (!sound)
+        {
             return 0.0f;
         }
-
-        switch (sound->kind)
-        {
-            case SGSD_SOUND_EFFECT:
-            {
-                int idx = sk_get_channel(sound);
-                return ( idx >= 0 && idx < SG_MAX_CHANNELS ? 1.0f : 0.0f );
-            }
-            case SGSD_MUSIC:
-            {
-                if ( _current_music == sound && openal_get_source_state(sound->openal_source_id) == AL_PLAYING ) return 1.0f;
-                break;
-            }
-
-            case SGSD_UNKNOWN:
-                break;
-        }
+        if (openal_get_source_state(sound->openal_source_id) == AL_PLAYING)
+            return 1.0f;
 
         return 0.0f;
     }
@@ -657,18 +592,20 @@ namespace splashkit_lib
     {
         internal_sk_init();
         sk_sound_data *sound = _current_music;
-        if (
-            sound != nullptr &&
-            sound->openal_source_id > 0)
-        {
-            alSourcef(sound->openal_source_id, AL_GAIN, vol);
-        }
+        sk_set_sound_volume(sound, vol);
     }
 
     float sk_music_vol()
     {
         internal_sk_init();
         sk_sound_data *sound = _current_music;
+        
+        return sk_sound_volume(sound);
+    }
+
+    float sk_sound_volume(sk_sound_data *sound)
+    {
+        if ( ! sound ) return 0.0f;
         ALfloat vol = 0;
         if (
             sound != nullptr &&
@@ -676,45 +613,21 @@ namespace splashkit_lib
         {
             alGetSourcef(sound->openal_source_id, AL_GAIN, &vol);
         }
-        return vol;
-    }
-
-    float sk_sound_volume(sk_sound_data *sound)
-    {
-        if ( ! sound ) return 0.0f;
-
-        switch (sound->kind)
-        {
-            case SGSD_MUSIC:
-                if ( _current_music == sound ) return sk_music_vol();
-                break;
-            case SGSD_SOUND_EFFECT:
-                return Mix_VolumeChunk(static_cast<Mix_Chunk *>(sound->_data), -1) / static_cast<float>(MIX_MAX_VOLUME);
-            case SGSD_UNKNOWN:
-                break;
-        }
-
         return 0.0f;
     }
 
     void sk_set_sound_volume(sk_sound_data *sound, float vol)
     {
         if ( !sound ) return;
-
-        switch (sound->kind)
+        if (
+            sound != nullptr &&
+            sound->openal_source_id > 0)
         {
-            case SGSD_MUSIC:
-                if ( _current_music == sound )
-                    sk_set_music_vol(vol);
-                break;
-                
-            case SGSD_SOUND_EFFECT:
-                Mix_VolumeChunk(static_cast<Mix_Chunk *>(sound->_data), static_cast<int>(vol * MIX_MAX_VOLUME));
-                break;
-                
-            case SGSD_UNKNOWN:
-                break;
+            ALfloat max_gain;
+            alGetSourcef(sound->openal_source_id, AL_MAX_GAIN, &max_gain);
+            alSourcef(sound->openal_source_id, AL_GAIN, vol*max_gain);
         }
+
     }
 
     
@@ -749,35 +662,16 @@ namespace splashkit_lib
     {
         internal_sk_init();
         sk_sound_data *sound = _current_music;
-        if(sound != nullptr && sound->openal_source_id > 0){
-            alSourceStop(sound->openal_source_id);
-        }
+        sk_stop_sound(sound);
+        
     }
     
     void sk_stop_sound(sk_sound_data *sound)
     {
         if ( ! sound ) return;
-        
-        switch (sound->kind)
+        if (sound != nullptr && sound->openal_source_id > 0)
         {
-            case SGSD_MUSIC:
-                if ( _current_music == sound ) sk_stop_music();
-                break;
-                
-            case SGSD_SOUND_EFFECT:
-            {
-                for (int i = 0; i < SG_MAX_CHANNELS; i++)
-                {
-                    if ( _sk_sound_channels[i] == sound->_data )
-                    {
-                        Mix_HaltChannel(i);
-                    }
-                }
-                break;
-            }
-                
-            case SGSD_UNKNOWN:
-                break;
+            alSourceStop(sound->openal_source_id);
         }
     }
     

@@ -18,8 +18,26 @@ TEST_CASE("Audio can be setup and shutdown", "[audio]"){
         REQUIRE(sk::sk_audio_get_last_error() != -1);
     }
 
+    SECTION("Get Device Attributes"){
+        sk::sk_init_audio();
+        REQUIRE(sk::sk_audio_get_last_error() != -1);
+        sk::sk_open_audio();
+
+        int size = 0;
+        int* attributes = sk::sk_get_device_attributes(&size);
+        REQUIRE(size > 0);
+        REQUIRE(attributes != nullptr);
+        
+        delete attributes;
+
+        sk::sk_close_audio();
+        sk::free_all_music();
+
+    }
+
 }
-TEST_CASE("Music can be played", "[audio]"){
+
+TEST_CASE("Music can be played", "[audio][music]"){
     // Setup
     namespace sk = splashkit_lib;
     sk::sk_init_audio();
@@ -66,18 +84,12 @@ TEST_CASE("Music can be played", "[audio]"){
         sk::music music = sk::load_music("magic", "magical_night.ogg");
         REQUIRE(music != nullptr);
         sk::play_music(music);
-        int i = 0;
-        while(i < 100){
-            struct timespec ts, rem;
-            unsigned long nsec = 10000000;
-            ts.tv_sec = (time_t)(nsec / 1000000000ul);
-            ts.tv_nsec = (long)(nsec % 1000000000ul);
-            while(nanosleep(&ts, &rem) == -1 && errno == EINTR){
-                ts = rem;
-            }
-            i++;
-            INFO("Volume is " << sk::music_volume());
-        }
+        sk::pause_music();
+        REQUIRE(sk::sk_audio_get_last_error() != -1);
+        sk::resume_music();
+        REQUIRE(sk::sk_audio_get_last_error() != -1);
+        sk::stop_music();
+        REQUIRE(sk::sk_audio_get_last_error() != -1);
     }
 
     sk::stop_music();

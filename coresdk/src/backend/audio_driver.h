@@ -40,6 +40,7 @@ namespace splashkit_lib
     void sk_close_audio();
     bool sk_audio_is_open();
     int sk_audio_get_last_error();
+    int* sk_get_device_attributes(int* size);
 
     int sk_get_channel(sk_sound_data *sound);
 
