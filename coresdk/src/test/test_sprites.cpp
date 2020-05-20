@@ -23,6 +23,7 @@ void run_sprite_test()
     triangle tri_b, init_tri_b;
     rectangle r;
     quad q;
+	triangle t;
 
     open_window("Sprite Rotation", 600, 600);
     
@@ -38,6 +39,7 @@ void run_sprite_test()
     sprite_set_x(s2, 100);
     sprite_set_y(s2, 100);
 
+	t = triangle_from(50,0,0,100,100,100);
     r = rectangle_from(400, 100, 100, 50);
     q = quad_from(r);
     apply_matrix(matrix_multiply(translation_matrix(0, 50), rotation_matrix(45)), q);
@@ -79,6 +81,7 @@ void run_sprite_test()
 
         tri = init_tri;
         tri_b = init_tri_b;
+
         
         apply_matrix(sprite_location_matrix(sprt), tri);
         apply_matrix(sprite_location_matrix(sprt), tri_b);
@@ -97,6 +100,15 @@ void run_sprite_test()
 
         draw_sprite(sprt);
         draw_sprite(s2);
+		draw_triangle(COLOR_BLACK,t);
+		
+		// add triangle bounding sprite
+        draw_triangle(COLOR_RED,sprite_collision_triangle(sprt));
+
+		if(sprite_triangle_collision(sprt,t))
+        {
+            draw_triangle(COLOR_RED,t);
+        }
         
         if (sprite_rectangle_collision(sprt, r))
 		{

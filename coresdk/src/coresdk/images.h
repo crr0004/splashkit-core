@@ -627,5 +627,7 @@ namespace splashkit_lib
      * @attribute method pixel_drawn_at_point_in_cell
      */
     bool pixel_drawn_at_point(bitmap bmp, int cell, const point_2d &pt);
+	
+	triangle bitmap_cell_triangle(bitmap src,const point_2d &pt, const point_2d &pt1, const point_2d &pt3);
 }
 #endif /* images_h */

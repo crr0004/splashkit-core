@@ -1678,4 +1678,38 @@ namespace splashkit_lib
     {
         if ( VALID_PTR(s, SPRITE_PTR) ) s->collision_bitmap = bmp;
     }
+	
+	//sprite collision triangle will around sprite
+    triangle sprite_collision_triangle(sprite s)
+    {
+        if(INVALID_PTR(s,SPRITE_PTR))
+            return triangle_from(0,0,0,0,0,0);
+        else 
+        {
+            int cw = bitmap_cell_width(s->collision_bitmap);
+            int ch = bitmap_cell_height(s->collision_bitmap);
+
+            point_2d pts[3];
+            pts[0] = point_at((cw-1)/2,0);
+            pts[1] = point_at(0,ch-1);
+            pts[2] = point_at(cw-1,ch-1);
+
+            matrix_2d m = sprite_location_matrix(s);
+            
+            for (int i = 0; i < 3; i++)
+            {
+                pts[i] = matrix_multiply(m, pts[i]);
+            }
+
+            float x1 = pts[0].x;
+            float x2 = pts[1].x;
+            float x3 = pts[2].x;
+
+            float y1 = pts[0].y;
+            float y2 = pts[1].y;
+            float y3 = pts[2].y;
+
+            return triangle_from(x3,y3,x1,y1,x2,y2);
+        }
+    }
 }

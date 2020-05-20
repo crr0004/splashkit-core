@@ -542,4 +542,15 @@ namespace splashkit_lib
     {
         return pixel_drawn_at_point(bmp, cell, pt.x, pt.y);
     }
+
+	//bitmap cell triangle and return a triangle
+    triangle bitmap_cell_triangle(bitmap src,const point_2d &pt, const point_2d &pt1, const point_2d &pt3)
+    {
+         if ( INVALID_PTR(src, BITMAP_PTR))
+        {
+            LOG(WARNING) << "Attempting to get bitmap cell rectangle from invalid image";
+            return triangle_from(0, 0, 0, 0, 0, 0);
+        }
+        return triangle_from(pt,pt1,pt3);
+    }
 }

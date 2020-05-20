@@ -385,5 +385,35 @@ namespace splashkit_lib
     {
         return bitmap_collision(bmp1, 0, translation_matrix(x1, y1), bmp2, 0, translation_matrix(x2, y2));
     }
+	    bool bitmap_triangle_collision(bitmap bmp, int cell, const matrix_2d& translation, const triangle& t)
+    {
+        if (INVALID_PTR(bmp, BITMAP_PTR))
+        {
+            return false;
+        }
+        
+        quad q1, q2;
+        
+        q1 = quad_from(bitmap_cell_rectangle(bmp), translation);
+        rectangle rect = rectangle_around(t);
+        q2 = quad_from(rect);
+        
+        if ( not quads_intersect(q1, q2) ) return false;
+        
+        return _step_through_pixels(rect.width, rect.height, translation_matrix(rect.x, rect.y), bmp->cell_w, bmp->cell_h, translation, [&] (int ax, int ay, int bx, int by)
+                                    {
+                                        return pixel_drawn_at_point(bmp, cell, bx, by) && point_in_triangle(point_at(rect.x + ax, rect.y + ay),t);
+                                    });
+    }
+
+    bool bitmap_triangle_collision(bitmap bmp, const point_2d& pt, const triangle& t)
+    {
+        return bitmap_triangle_collision(bmp, 0, translation_matrix(pt), t);
+    }
+
+    bool sprite_triangle_collision(sprite s, const triangle& t)
+    {
+        return bitmap_triangle_collision(sprite_collision_bitmap(s), sprite_current_cell(s), sprite_location_matrix(s), t);
+    }
 
 }

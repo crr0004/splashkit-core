@@ -1,9 +1,13 @@
 #include "splashkit.h"
+<<<<<<< HEAD
 
+=======
+>>>>>>> c43b1aa... I have created a small game that draws a player to a window. It can be controlled with the arrow keys. The aim is to build off this game and implement the new collision functions.
 #define SCREEN_BORDER 100
 
 //load resources
 void load_resources()
+<<<<<<< HEAD
 {   
     load_bitmap("player", "aaa.png");
     load_bitmap("coin", "Coin.png");
@@ -13,11 +17,16 @@ void load_resources()
     load_bitmap("start", "Start.png");
     load_bitmap("quit", "Quit.png");
     load_bitmap("sound", "Sound.png");
+=======
+{
+    load_bitmap("player", "Player.png");
+>>>>>>> c43b1aa... I have created a small game that draws a player to a window. It can be controlled with the arrow keys. The aim is to build off this game and implement the new collision functions.
 }
 
 //defines player attributes
 struct Player
 {
+<<<<<<< HEAD
     int sprite = 0;
     bitmap bitmap;
     point_2d point;
@@ -35,6 +44,13 @@ struct Item
 
 Item item;
 
+=======
+    bitmap bitmap = bitmap_named("player");
+    float x = screen_width() / 2;
+    float y = screen_height() / 2;
+};
+
+>>>>>>> c43b1aa... I have created a small game that draws a player to a window. It can be controlled with the arrow keys. The aim is to build off this game and implement the new collision functions.
 //screen characteristics
 void window_setup(string win_name, int width, int height)
 {
@@ -44,6 +60,7 @@ void window_setup(string win_name, int width, int height)
 int main()
 {
     load_resources();
+<<<<<<< HEAD
     window window = open_window("Physics Collision Game", 800, 600);
 
     //player setup
@@ -115,12 +132,38 @@ int main()
             }
 
         }
+=======
+    window_setup("Test program", 800, 600);
+    Player player;
+
+    while (! quit_requested())
+    {
+        process_events();
+        clear_screen(COLOR_WHITE);
+        draw_bitmap(player.bitmap, player.x, player.y);
+
+        if (key_down(LEFT_KEY))  player.x -= 5;
+        if (key_down(RIGHT_KEY))  player.x += 5;
+        if (key_down(DOWN_KEY))  player.y += 5;
+        if (key_down(UP_KEY))  player.y -= 5;
+
+>>>>>>> c43b1aa... I have created a small game that draws a player to a window. It can be controlled with the arrow keys. The aim is to build off this game and implement the new collision functions.
         refresh_screen(60);
     } 
     
     return 0;
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+>>>>>>> c43b1aa... I have created a small game that draws a player to a window. It can be controlled with the arrow keys. The aim is to build off this game and implement the new collision functions.
 // ============== Below is the old code written by Sunny (?)
 
 //declares rectangles and their attributes

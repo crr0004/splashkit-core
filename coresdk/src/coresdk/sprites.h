@@ -1868,5 +1868,7 @@ namespace splashkit_lib
      * @returns The name of the current sprite pack.
      */
     string current_sprite_pack();
+	
+	triangle sprite_collision_triangle(sprite s);
 }
 #endif /* sprites_h */

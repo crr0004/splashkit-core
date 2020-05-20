@@ -475,6 +475,10 @@ namespace splashkit_lib
      * @attribute method bitmap_collision
      */
     bool bitmap_collision(bitmap bmp1, double x1, double y1, bitmap bmp2, double x2, double y2);
+	
+	bool bitmap_triangle_collision(bitmap bmp, const point_2d& pt, const triangle& t);
+
+    bool sprite_triangle_collision(sprite s, const triangle& t);
 
 }
 #endif /* collisions_h */
