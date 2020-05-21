@@ -1,19 +1,30 @@
 #include "splashkit.h"
+
 #define SCREEN_BORDER 100
 
 //load resources
 void load_resources()
-{
-    load_bitmap("player", "Player.png");
+{   
+    load_bitmap("player", "aaa.png");
+    load_bitmap("coin", "Coin.png");
+    load_bitmap("fish", "Fish.png");
+    load_bitmap("icecream", "Icecream.png");
+    load_bitmap("pacman", "Pacman.png");
+    load_bitmap("start", "Start.png");
+    load_bitmap("quit", "Quit.png");
+    load_bitmap("sound", "Sound.png");
 }
 
 //defines player attributes
 struct Player
 {
-    bitmap bitmap = bitmap_named("player");
-    float x = screen_width() / 2;
-    float y = screen_height() / 2;
+    int sprite = 0;
+    bitmap bitmap;
+    float x;
+    float y;
 };
+
+Player player;
 
 //screen characteristics
 void window_setup(string win_name, int width, int height)
@@ -24,32 +35,65 @@ void window_setup(string win_name, int width, int height)
 int main()
 {
     load_resources();
-    window_setup("Test program", 800, 600);
-    Player player;
+    window window = open_window("Physics Collision Game", 800, 600);
 
-    while (! quit_requested())
+    //player setup
+    player.bitmap = bitmap_named("player");
+    player.x = screen_width() / 2 - 60;
+    player.y = screen_height() / 2 - 60;
+    int sprite_num = 0;
+    bool quit = false;
+
+    //Collision entity (geometry or sprite) to be loaded here
+
+    while (quit == false)
     {
         process_events();
         clear_screen(COLOR_WHITE);
         draw_bitmap(player.bitmap, player.x, player.y);
+        draw_text_on_window(window, "Press c to change sprite", COLOR_BLACK, 550, 550);
 
+        //Collision check with one of the new collision functions
+        //Add a function that changes which collision function is used
+
+        //Player controls
         if (key_down(LEFT_KEY))  player.x -= 5;
         if (key_down(RIGHT_KEY))  player.x += 5;
         if (key_down(DOWN_KEY))  player.y += 5;
         if (key_down(UP_KEY))  player.y -= 5;
 
+        //Quit options
+        if (key_down(ESCAPE_KEY)) 
+            {
+                quit = true;
+            }
+        if (quit_requested()) 
+            {
+                quit = true;
+            }
+        //Changes the player sprite
+        if (key_released(C_KEY))
+        {
+            sprite_num = ((sprite_num + 1) % 3);
+            write_line(sprite_num);
+            if (sprite_num == 0)
+            {
+                player.bitmap = bitmap_named("player");
+            }
+            if (sprite_num == 1)
+            {
+                player.bitmap = bitmap_named("pacman");
+            }
+            if (sprite_num == 2)
+            {
+                player.bitmap = bitmap_named("fish");
+            }
+        }
         refresh_screen(60);
     } 
     
     return 0;
 }
-
-
-
-
-
-
-
 
 // ============== Below is the old code written by Sunny (?)
 
