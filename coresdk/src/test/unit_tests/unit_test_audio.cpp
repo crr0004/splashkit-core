@@ -2,6 +2,7 @@
 
 #include "audio_driver.h"
 #include "music.h"
+#include "sound.h"
 
 TEST_CASE("Audio can be setup and shutdown", "[audio]"){
     namespace sk = splashkit_lib;
@@ -98,4 +99,62 @@ TEST_CASE("Music can be played", "[audio][music]"){
     // Teardown
     // sk::sk_close_audio();
     // REQUIRE(sk::sk_audio_get_last_error() != -1);
+}
+
+TEST_CASE("Play sound files", "[audio][sounds]"){
+    namespace sk = splashkit_lib;
+    sk::sk_init_audio();
+    REQUIRE(sk::sk_audio_get_last_error() != -1);
+    sk::sk_open_audio();
+
+
+    SECTION("Play one sound"){
+        sk::sound_effect test_sound = sk::load_sound_effect("test", "test.ogg");
+        sk::play_sound_effect(test_sound);
+        sk::play_sound_effect(
+            sk::load_sound_effect("test2", "280.mp3")
+        );
+        REQUIRE(sk::sound_effect_playing(test_sound));
+        // Just delays so the sound can play
+        // int i = 0;
+        // while(i < 10000){
+        //     struct timespec ts, rem;
+        //     unsigned long nsec = 10000000;
+        //     ts.tv_sec = (time_t)(nsec / 1000000000ul);
+        //     ts.tv_nsec = (long)(nsec % 1000000000ul);
+        //     while(nanosleep(&ts, &rem) == -1 && errno == EINTR){
+        //         ts = rem;
+        //     }
+        //     i++;
+        // }
+
+    }
+    SECTION("Play multiple sounds"){
+        sk::sound_effect test_sound = sk::load_sound_effect("test", "test.ogg");
+        REQUIRE(!sk::sound_effect_playing(test_sound));
+        sk::play_sound_effect(test_sound);
+        sk::play_sound_effect(
+            sk::load_sound_effect("test2", "280.mp3")
+        );
+        REQUIRE(sk::sound_effect_playing("test2"));
+        REQUIRE(sk::sound_effect_playing(test_sound));
+        // Just delays so the sound can play
+        // int i = 0;
+        // while(i < 10000){
+        //     struct timespec ts, rem;
+        //     unsigned long nsec = 10000000;
+        //     ts.tv_sec = (time_t)(nsec / 1000000000ul);
+        //     ts.tv_nsec = (long)(nsec % 1000000000ul);
+        //     while(nanosleep(&ts, &rem) == -1 && errno == EINTR){
+        //         ts = rem;
+        //     }
+        //     i++;
+        // }
+
+    }
+    sk::stop_music();
+    sk::free_all_music();
+    sk::free_all_sound_effects();
+    sk::sk_close_audio();
+
 }
