@@ -20,11 +20,20 @@ struct Player
 {
     int sprite = 0;
     bitmap bitmap;
-    float x;
-    float y;
+    point_2d point;
 };
 
 Player player;
+
+//defines player attributes
+struct Item
+{
+    int sprite = 0;
+    bitmap bitmap;
+    point_2d point;
+};
+
+Item item;
 
 //screen characteristics
 void window_setup(string win_name, int width, int height)
@@ -39,9 +48,15 @@ int main()
 
     //player setup
     player.bitmap = bitmap_named("player");
-    player.x = screen_width() / 2 - 60;
-    player.y = screen_height() / 2 - 60;
+    player.point.x = screen_width() / 2 - 60;
+    player.point.y = screen_height() / 2 - 60;
     int sprite_num = 0;
+
+    //item setup
+    item.bitmap = bitmap_named("coin");
+    item.point.x = screen_width() / 2 - 200;
+    item.point.y = screen_height() / 2 - 200;
+
     bool quit = false;
 
     //Collision entity (geometry or sprite) to be loaded here
@@ -50,17 +65,19 @@ int main()
     {
         process_events();
         clear_screen(COLOR_WHITE);
-        draw_bitmap(player.bitmap, player.x, player.y);
+        
+        draw_bitmap(item.bitmap, item.point.x, item.point.y);
+        draw_bitmap(player.bitmap, player.point.x, player.point.y);
         draw_text_on_window(window, "Press c to change sprite", COLOR_BLACK, 550, 550);
 
         //Collision check with one of the new collision functions
         //Add a function that changes which collision function is used
 
         //Player controls
-        if (key_down(LEFT_KEY))  player.x -= 5;
-        if (key_down(RIGHT_KEY))  player.x += 5;
-        if (key_down(DOWN_KEY))  player.y += 5;
-        if (key_down(UP_KEY))  player.y -= 5;
+        if (key_down(LEFT_KEY))  player.point.x -= 5;
+        if (key_down(RIGHT_KEY))  player.point.x += 5;
+        if (key_down(DOWN_KEY))  player.point.y += 5;
+        if (key_down(UP_KEY))  player.point.y -= 5;
 
         //Quit options
         if (key_down(ESCAPE_KEY)) 
@@ -71,6 +88,14 @@ int main()
             {
                 quit = true;
             }
+
+        //Collision
+        //Bitmap / sprite based 
+        if (bitmap_collision(player.bitmap, player.point, item.bitmap, item.point) == true)
+        {
+            item.point = random_window_point(window);
+        }
+
         //Changes the player sprite
         if (key_released(C_KEY))
         {
@@ -88,6 +113,7 @@ int main()
             {
                 player.bitmap = bitmap_named("fish");
             }
+
         }
         refresh_screen(60);
     } 
