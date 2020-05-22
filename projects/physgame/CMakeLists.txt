@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 # Include this before everything else to ensure we can override things,
 # like the project name
 include(${CMAKE_SOURCE_DIR}/../cmake/CMakeLists.txt)
+set(CMAKE_BUILD_TYPE Debug)
 project(Physgame)
 
 set(SOURCE_CXX 
