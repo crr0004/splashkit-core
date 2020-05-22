@@ -10,7 +10,7 @@ set(SOURCE_CXX
     ${CMAKE_SOURCE_DIR}/../../generated/clib/lib_type_mapper.cpp
     ${CMAKE_SOURCE_DIR}/../../generated/cpp/adapter_type_mapper.cpp
     ${CMAKE_SOURCE_DIR}/../../generated/cpp/splashkit.cpp
-    program.cpp
+    program_with_sprites.cpp
 
 )
 
