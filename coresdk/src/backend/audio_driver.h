@@ -10,6 +10,7 @@
 #define sk_AudioDriver_h
 
 #include <string>
+#include <thread>
 using std::string;
 
 namespace splashkit_lib
@@ -30,8 +31,8 @@ namespace splashkit_lib
 
         // private data used by backend
         void * _data;
-        int openal_id;
-        int openal_source_id;
+        int openal_id = 0;
+        int openal_source_id = 0;
     } sk_sound_data;
 
 
@@ -51,6 +52,8 @@ namespace splashkit_lib
     void sk_play_sound(sk_sound_data * sound, int loops, float volume);
 
     float sk_sound_playing(sk_sound_data * sound);
+
+    std::thread get_fading_thread();
 
     void sk_fade_in(sk_sound_data *sound, int loops, int ms);
 

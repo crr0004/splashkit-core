@@ -17,6 +17,7 @@
 #include <sstream>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <thread>
 
 extern "C"{
     #include <libavutil/frame.h>
@@ -480,13 +481,16 @@ namespace splashkit_lib
 
         delete (const uint8_t *)sound->_data;
         sound->_data = nullptr;
+
         if (sound->openal_source_id > 0)
         {
             alSourceStop(sound->openal_source_id);
             alSourcei(sound->openal_source_id, AL_BUFFER, 0);
+            alDeleteSources(1, (const ALuint *)&sound->openal_source_id);
         }
-        alDeleteBuffers(1, (const ALuint *)&sound->openal_id);
-        alDeleteSources(1, (const ALuint *)&sound->openal_source_id);
+        if(sound->openal_id > 0){
+            alDeleteBuffers(1, (const ALuint *)&sound->openal_id);
+        }
         sound->openal_id = 0;
         sound->openal_source_id = 0;
 
@@ -503,7 +507,9 @@ namespace splashkit_lib
         sound->openal_source_id = openal_play_sound(
             sound->openal_id);
         sk_set_music_vol(volume);
-        _current_music = sound;
+        if(sound->kind == SGSD_MUSIC){
+            _current_music = sound;
+        }
     }
 
     float sk_sound_playing(sk_sound_data *sound)
@@ -518,61 +524,53 @@ namespace splashkit_lib
         return 0.0f;
     }
 
+    /**
+     * @brief Fades the sound data by volume
+     * 
+     * @param sound sound to fade
+     * @param ms time to take in milliseconds
+     * @param direction 1 for fade in, else for fade out
+     */
+    void fade(sk_sound_data &sound, int ms, int direction){
+        int source = sound.openal_source_id;
+
+        int running_ms = 0;
+        // 1 for fade in (start at 0), otherwise 1 (start at 1)
+        float volume = direction == 1 ? 0.0f : 1.0f;
+        float volume_step = 1.0f/(ms/16.0f);
+        // We want to step the volume position or negative
+        // direction 1 is fade in so we want to add
+        // otherwise step the volume back (negative add)
+        volume_step *= (direction == 1) ? 1 : -1;
+        while(running_ms < ms){
+            alSourcef(source, AL_GAIN, volume);
+            volume += volume_step;
+            // Clip the volume to zero
+            volume = (volume < 0) ? 0 : volume;
+            running_ms += 16;
+            std::cout << "Volume: " << volume << "\n";
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        }
+
+    }
+
     void sk_fade_in(sk_sound_data *sound, int loops, int ms)
     {
-        if ( !sound ) return;
-
-        switch (sound->kind)
-        {
-            case SGSD_SOUND_EFFECT:
-            {
-                int channel;
-                channel = Mix_FadeInChannel(-1, static_cast<Mix_Chunk *>(sound->_data), loops, ms);
-                if ( channel >= 0 && channel < SG_MAX_CHANNELS )
-                {
-                    _sk_sound_channels[channel] = static_cast<Mix_Chunk *>(sound->_data);
-                }
-                break;
-            }
-
-            case SGSD_MUSIC:
-            {
-                Mix_FadeInMusic(static_cast<Mix_Music *>(sound->_data), loops, ms);
-                _current_music = sound;
-                break;
-            }
-
-            case SGSD_UNKNOWN:
-                break;
-        }
+        if ( !sound && sound->openal_id > 0) return;
+        sk_play_sound(sound, 1, 0.0f);
+        std::thread *t = new std::thread(fade, std::ref(*sound), ms, 1);
+        // This ensures the resources will be freed when they are done
+        t->detach();
     }
 
     void sk_fade_out(sk_sound_data *sound, int ms)
     {
-        if ( !sound ) return;
-
-        switch (sound->kind)
-        {
-            case SGSD_SOUND_EFFECT:
-            {
-                int channel = sk_get_channel(sound);
-                Mix_FadeOutChannel(channel, ms);
-                break;
-            }
-
-            case SGSD_MUSIC:
-            {
-                if ( _current_music == sound )
-                {
-                    Mix_FadeOutMusic(ms);
-                    _current_music = nullptr;
-                }
-                break;
-            }
-
-            case SGSD_UNKNOWN:
-                break;
-        }
+        if ( !sound && sound->openal_id > 0) return;
+        sk_play_sound(sound, 1, 1.0f);
+        std::thread *t = new std::thread(fade, std::ref(*sound), ms, -1);
+        // This ensures the resources will be freed when they are done
+        t->detach();
     }
 
     void sk_fade_all_sound_effects_out(int ms)

@@ -102,6 +102,7 @@ TEST_CASE("Music can be played", "[audio][music]"){
 }
 
 TEST_CASE("Play sound files", "[audio][sounds]"){
+
     namespace sk = splashkit_lib;
     sk::sk_init_audio();
     REQUIRE(sk::sk_audio_get_last_error() != -1);
@@ -157,4 +158,36 @@ TEST_CASE("Play sound files", "[audio][sounds]"){
     sk::free_all_sound_effects();
     sk::sk_close_audio();
 
+}
+
+#include <thread>
+
+TEST_CASE("Fade audio", "[audio][fade]"){
+    namespace sk = splashkit_lib;
+    sk::sk_init_audio();
+    REQUIRE(sk::sk_audio_get_last_error() != -1);
+    sk::sk_open_audio();
+
+    // SECTION("Fade in"){
+    //     sk::music music = sk::load_music("magic", "magical_night.ogg");
+    //     sk::fade_music_in(music, 5000);
+    //     REQUIRE(sk::music_playing());
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    // }
+
+    SECTION("Fade out"){
+        sk::music music = sk::load_music("magic", "magical_night.ogg");
+        sk::play_music(music);
+        sk::fade_music_out(1000);
+        REQUIRE(sk::music_playing());
+        std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+
+    }
+    
+
+    sk::stop_music();
+    sk::free_all_music();
+    sk::free_all_sound_effects();
+    sk::sk_close_audio();
 }
