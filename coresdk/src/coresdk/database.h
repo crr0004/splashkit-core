@@ -328,5 +328,5 @@ namespace splashkit_lib
      */
     void free_all_databases();
 
-#endif /* database_h */
 }
+#endif /* database_h */

@@ -74,7 +74,13 @@ else()
                    -lfreetype \
                    -lcurl \
                    -lncurses \
-                   -ldl")
+                   -ldl"
+                   -lopenal
+                   -lavcodec
+                   -lavformat
+                   -lavutil
+                   -lswresample
+        )
 endif()
 
 # FLAGS
@@ -97,6 +103,7 @@ file(GLOB TEST_SOURCE_FILES
 
 file(GLOB UNIT_TEST_SOURCE_FILES
     "${SK_SRC}/test/unit_tests/*.cpp"
+    ${SK_SRC}/test/unit_tests/unit_test_audio.cpp
 )
 
 # SKSDK FILE INCLUDES
@@ -115,6 +122,7 @@ include_directories("${SK_EXT}/hash-library")
 include_directories("${SK_EXT}/json")
 include_directories("${SK_EXT}/sqlite")
 include_directories("${SK_EXT}/catch")
+include_directories("${SK_EXT}/ffmpeg")
 
 # MAC OS AND WINDOWS DIRECTORY INCLUDES
 if (APPLE OR MSYS)

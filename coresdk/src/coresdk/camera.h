@@ -331,5 +331,5 @@ namespace splashkit_lib
      */
     void center_camera_on(sprite s, const vector_2d &offset);
 
-#endif /* camera_hpp */
 }
+#endif /* camera_hpp */
