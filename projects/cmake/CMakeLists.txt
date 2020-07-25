@@ -52,7 +52,13 @@ elseif(MSYS)
     set(LIB_FLAGS "-L${SK_LIB}/win64 \
                    -L/mingw64/lib \
                    -L/usr/lib \
-                   -lSDL2main")
+                   -lSDL2main"
+                   -lopenal
+                   -lavcodec
+                   -lavformat
+                   -lavutil
+                   -lswresample
+									 )
 # LINUX PROJECT FLAGS
 else()
     set(LIB_FLAGS "-lSDL2 \
