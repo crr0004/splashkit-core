@@ -134,6 +134,9 @@ namespace splashkit_lib
 
         // Mix_AllocateChannels(SG_MAX_CHANNELS);
 
+        if(_sk_audio_open == false){
+            sk_init_audio();
+        }
         _sk_audio_open = true;
     }
 
@@ -322,6 +325,15 @@ namespace splashkit_lib
 
         buffer = 0;
         alGenBuffers(1, &buffer);
+        err = alGetError();
+        if (err != AL_NO_ERROR)
+        {
+            fprintf(stderr, "OpenAL Error: %s\n", alGetString(err));
+            if (buffer && alIsBuffer(buffer))
+                alDeleteBuffers(1, &buffer);
+            return 0;
+        }
+
         alBufferData(
             buffer,
             AL_FORMAT_STEREO16,
@@ -451,8 +463,8 @@ namespace splashkit_lib
 
         result.kind = kind;
         result._data = nullptr;
-        result.openal_id = 0;
-        result.openal_source_id = 0;
+        result.openal_id = -1;
+        result.openal_source_id = -1;
 
         result._data = read_audio_into_buffer(
             filename.c_str(),
@@ -506,10 +518,10 @@ namespace splashkit_lib
 
         sound->openal_source_id = openal_play_sound(
             sound->openal_id);
-        sk_set_music_vol(volume);
         if(sound->kind == SGSD_MUSIC){
             _current_music = sound;
         }
+        sk_set_music_vol(volume);
     }
 
     float sk_sound_playing(sk_sound_data *sound)

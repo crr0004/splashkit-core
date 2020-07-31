@@ -63,17 +63,17 @@ TEST_CASE("Music can be played", "[audio][music]"){
         sk::play_music(music);
         // Uncomment to hear audio playing
         int i = 0;
-        while(i < 100){
-            struct timespec ts, rem;
-            unsigned long nsec = 10000000;
-            ts.tv_sec = (time_t)(nsec / 1000000000ul);
-            ts.tv_nsec = (long)(nsec % 1000000000ul);
-            while(nanosleep(&ts, &rem) == -1 && errno == EINTR){
-                ts = rem;
-            }
-            i++;
-            INFO("Volume is " << sk::music_volume());
-        }
+        // while(i < 100){
+        //     struct timespec ts, rem;
+        //     unsigned long nsec = 10000000;
+        //     ts.tv_sec = (time_t)(nsec / 1000000000ul);
+        //     ts.tv_nsec = (long)(nsec % 1000000000ul);
+        //     while(nanosleep(&ts, &rem) == -1 && errno == EINTR){
+        //         ts = rem;
+        //     }
+        //     i++;
+        //     INFO("Volume is " << sk::music_volume());
+        // }
 
         // sk::play_music(music);
 
