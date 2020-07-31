@@ -61,6 +61,7 @@ int main()
 
     bool quit = false;
     //Collision entity (geometry or sprite) to be loaded here
+    play_music(load_music("music", "magical_night.ogg"), 100);
 
     while (quit == false)
     {
