@@ -1,6 +1,7 @@
 [submodule "coresdk/external"]
 	path = coresdk/external
 	url = https://bitbucket-students.deakin.edu.au/scm/~crrhodes/splashkit-external.git
+	branch = master
 [submodule "tools/translator"]
 	path = tools/translator
 	url = https://github.com/splashkit/splashkit-translator
