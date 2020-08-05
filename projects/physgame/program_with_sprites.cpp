@@ -48,6 +48,7 @@ int main()
     load_resources();
     window_to_show = open_window("Physics Collision Game", 800, 600);
     sound_effect snd_effect;
+	snd_effect = load_sound_effect("bells", "0292.ogg");
 
     //player setup
     int sprite_num = 0;
@@ -116,7 +117,7 @@ int main()
                 score++;
 
                     //sound effect while collision
-                snd_effect = load_sound_effect("bells", "0292.ogg");
+
                 play_sound_effect(snd_effect);
             }
             if (player_collision || sprite_offscreen(s))
