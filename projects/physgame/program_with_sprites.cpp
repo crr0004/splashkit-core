@@ -47,8 +47,7 @@ int main()
 {
     load_resources();
     window_to_show = open_window("Physics Collision Game", 800, 600);
-    sound_effect snd_effect;
-	snd_effect = load_sound_effect("bells", "0292.ogg");
+    sound_effect snd_effect = load_sound_effect("bells", "0292_stero.ogg");
 
     //player setup
     int sprite_num = 0;

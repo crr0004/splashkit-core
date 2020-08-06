@@ -166,24 +166,24 @@ namespace splashkit_lib
         _sk_audio_open = false;
     }
 
-    void format_av_error(int ret)
+    void format_av_error(const int ret)
     {
         // Only want to trigger this on unhandable errors
         if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         {
             char errbuff[1028];
             av_strerror(ret, errbuff, 1028);
-            fprintf(stderr, "Error message (%d): %s\n", ret, errbuff);
-            exit(ret);
+            fprintf(stderr, "Audio decoding error (%d); message: %s\n", ret, errbuff);
+            // exit(ret);
         }
     }
 
-    void format_av_error(void *pointer, const char *error_msg)
+    void format_av_error(const void *pointer, const char *error_msg)
     {
         if (pointer == nullptr)
         {
             fprintf(stderr, "%s\n", error_msg);
-            exit(-1);
+            // exit(-1);
         }
     }
 
@@ -225,7 +225,8 @@ namespace splashkit_lib
         int last_nb_samples = 0;
 
         /* read all the output frames (in general there may be any number of them */
-        std::basic_stringstream<uint8_t> *stream = new std::basic_stringstream<uint8_t>();
+        // We use a string stream because we just want a memory backed allocation
+        std::basic_stringstream<uint8_t> stream;
         bool is_eof = false;
 
         ret = 0; // Clear the error number so it's not confused
@@ -248,6 +249,11 @@ namespace splashkit_lib
                         break;
                     }
                     ret = avcodec_send_packet(dec_ctx, pkt);
+                    // needs to flush
+                    if(ret == AVERROR(EINVAL)){
+                        ret = avcodec_send_packet(dec_ctx, nullptr);
+                        is_eof = true;
+                    }
                     format_av_error(ret);
                 }
                 // This spits out EAGAIN when it needs another frame from the packet stream
@@ -270,10 +276,11 @@ namespace splashkit_lib
                     // by using the de-coded frame settings. Normally you have to figure this out
                     // by using the format changes. E.G Upsampling sample rate
                     frame->channels,
-                    frame->nb_samples,
+                    swr_get_out_samples(swr, frame->nb_samples),
                     AV_SAMPLE_FMT_S16,
                     0);
                 last_nb_samples = frame->nb_samples;
+                format_av_error(ret);
             }
 
             // Convert our frame to what we want through SWR
@@ -298,16 +305,15 @@ namespace splashkit_lib
 
             // We only care about the first channel because the data is converted to packed
             size_t size = lineSize;
-            stream->write(outData, size);
+            stream.write(outData, size);
+            ret = 0;
         }
 
-        stream->flush();
+        stream.flush();
 
-        uint8_t* buf = new uint8_t[stream->tellp()];
-        stream->read(buf, stream->tellp());
-        *out_mem_size = stream->tellp();
-
-        delete stream;
+        uint8_t* buf = new uint8_t[stream.tellp()];
+        stream.read(buf, stream.tellp());
+        *out_mem_size = stream.tellp();
 
         return buf;
     }
@@ -372,7 +378,7 @@ namespace splashkit_lib
         alGenSources(1, &source);
         alSourcei(source, AL_BUFFER, (ALint)buffer);
         if(alGetError()!=AL_NO_ERROR){
-            exit(-1);
+            // exit(-1);
         }
 
         alSourcePlay(source);
@@ -560,7 +566,6 @@ namespace splashkit_lib
             // Clip the volume to zero
             volume = (volume < 0) ? 0 : volume;
             running_ms += 16;
-            std::cout << "Volume: " << volume << "\n";
 
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
