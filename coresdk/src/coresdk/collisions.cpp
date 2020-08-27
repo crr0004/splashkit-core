@@ -386,4 +386,21 @@ namespace splashkit_lib
         return bitmap_collision(bmp1, 0, translation_matrix(x1, y1), bmp2, 0, translation_matrix(x2, y2));
     }
 
+     bool circle_collision(const circle& circ1, const circle& circ2)
+     {
+        quad q1, q2;
+        rectangle rect1 = rectangle_around(circ1);
+        q1 = quad_from(rect1);
+        rectangle rect2 = rectangle_around(circ2);
+        q2 = quad_from(rect2);
+
+        if ( not quads_intersect(q1, q2) ) return false;
+
+        return _step_through_pixels(rect1.width, rect1.height, translation_matrix(rect1.x, rect1.y), rect2.width, rect2.height, translation_matrix(rect2.x, rect2.y), [&] (int ax, int ay, int bx, int by)
+                    {
+                          return point_in_circle(point_at(rect1.x + ax, rect1.y + ay), circ1) && point_in_circle(point_at(rect2.x + ax, rect2.y + ay), circ2);
+                    });
+     }
+
+
 }

@@ -476,5 +476,10 @@ namespace splashkit_lib
      */
     bool bitmap_collision(bitmap bmp1, double x1, double y1, bitmap bmp2, double x2, double y2);
 
+    //collision between 2 circles
+    bool circle_collision(const circle& circ1, const circle& circ2);
+
 }
+ 
+
 #endif /* collisions_h */
