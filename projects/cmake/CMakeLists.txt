@@ -46,7 +46,8 @@ if (APPLE)
                    -lfreetype \
                    -lcurl \
                    -lncurses \
-                   -ldl")
+                   -ldl
+                   -lBox2D")
 # WINDOWS PROJECT FLAGS
 elseif(MSYS)
     set(LIB_FLAGS "-L${SK_LIB}/win64 \
@@ -58,6 +59,7 @@ elseif(MSYS)
                    -lavformat
                    -lavutil
                    -lswresample
+                   -lBox2D
 									 )
 # LINUX PROJECT FLAGS
 else()
@@ -86,6 +88,7 @@ else()
                    -lavformat
                    -lavutil
                    -lswresample
+                   -lBox2D
         )
 endif()
 
