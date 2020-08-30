@@ -143,6 +143,12 @@ void run_sprite_test()
 		{
             draw_circle(COLOR_RED, sprite_collision_circle(s2));
 		}
+	
+        if (circle_collision(sprite_collision_circle(sprt),  sprite_collision_circle(s2)))
+		{
+            draw_circle(COLOR_BLUE, sprite_collision_circle(sprt));
+            draw_circle(COLOR_BLUE, sprite_collision_circle(s2));
+		}
 
         draw_rectangle(COLOR_GREEN, sprite_collision_rectangle(sprt));
 

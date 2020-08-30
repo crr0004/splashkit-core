@@ -480,5 +480,10 @@ namespace splashkit_lib
 
     bool sprite_triangle_collision(sprite s, const triangle& t);
 
+    //collision between 2 circles
+    bool circle_collision(const circle& circ1, const circle& circ2);
+
 }
+ 
+
 #endif /* collisions_h */
