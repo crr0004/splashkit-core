@@ -431,6 +431,16 @@ namespace splashkit_lib
                           return point_in_circle(point_at(rect1.x + ax, rect1.y + ay), circ1) && point_in_circle(point_at(rect2.x + ax, rect2.y + ay), circ2);
                     });
      }
+	 
+		//add  triangle collision 
+    bool triangle_collision(const triangle& t1,const triangle& t2)
+    {
+        if(triangles_intersect(t1,t2))
+        {
+            return true;
+        }
 
+        return false;
+    }
 
 }

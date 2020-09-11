@@ -476,9 +476,11 @@ namespace splashkit_lib
      */
     bool bitmap_collision(bitmap bmp1, double x1, double y1, bitmap bmp2, double x2, double y2);
 	
-	bool bitmap_triangle_collision(bitmap bmp, const point_2d& pt, const triangle& t);
+		bool bitmap_triangle_collision(bitmap bmp, const point_2d& pt, const triangle& t);
 
     bool sprite_triangle_collision(sprite s, const triangle& t);
+
+		bool triangle_collision(const triangle& t1,const triangle& t2);
 
     //collision between 2 circles
     bool circle_collision(const circle& circ1, const circle& circ2);
