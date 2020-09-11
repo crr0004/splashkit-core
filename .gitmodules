@@ -4,4 +4,4 @@
 	branch = master
 [submodule "tools/translator"]
 	path = tools/translator
-	url = https://github.com/splashkit/splashkit-translator
+	url = https://bitbucket-students.deakin.edu.au/scm/~crrhodes/splashkit-translator.git
