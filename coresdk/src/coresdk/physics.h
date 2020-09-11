@@ -48,8 +48,8 @@ namespace splashkit_lib
          * This creates and allocates a box2d body and fixture to act in the world
          * and keeps a reference to the sprite to be updated.
          **/
-        std::pair<sprite*, b2Body*> add_sprite_to_world(sprite*, const b2BodyDef&);
-        std::pair<sprite*, b2Body*> add_sprite_to_world(sprite* s){
+        std::pair<sprite, b2Body*>* add_sprite_to_world(sprite, const b2BodyDef&);
+        std::pair<sprite, b2Body*>* add_sprite_to_world(sprite s){
             return add_sprite_to_world(s, default_body_definition);
         }
         void step();
@@ -57,14 +57,14 @@ namespace splashkit_lib
          * Find a sprite and remove it from the world.
          * This will also remove the box2d body.
          */
-        sprite* remove_sprite_from_world(sprite*);
-        sprite* remove_sprite_from_world(int);
+        sprite remove_sprite_from_world(sprite);
+        sprite remove_sprite_from_world(int);
 
         /**
          * Locate the sprite in the world and return the sprite, box2d body pair.
          */
-        const std::pair<sprite *, b2Body *>* find(sprite *sprite);
-        auto find_sprite(sprite*);
+        const std::pair<sprite, b2Body *>* find(sprite sprite);
+        auto find_sprite(sprite);
         b2BodyDef get_default_body_definition(){
             return default_body_definition;
         }
@@ -73,7 +73,7 @@ namespace splashkit_lib
         b2BodyDef default_body_definition;
         b2World world{{0.0f, GRAVITY}};
         drawing_options options;
-        std::vector<std::pair<sprite*, b2Body*>> sprites_in_the_world;
+        std::vector<std::pair<sprite, b2Body*>*> sprites_in_the_world;
     };
 } // namespace splaskit_lib
 #endif /* physics_hpp */
