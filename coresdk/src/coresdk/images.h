@@ -628,6 +628,17 @@ namespace splashkit_lib
      */
     bool pixel_drawn_at_point(bitmap bmp, int cell, const point_2d &pt);
 	
+    /**
+     * Creates a triangle from the bitmap.
+     * 
+     * @param src   bitmap to create from.
+     * @param pt    first point of triangle.
+     * @param pt1   second point of triangle
+     * @param pt3   third point
+     * @returns     the triangle created from the bitmap points
+     * 
+     * @atrribute method bitmap_cell_triangle
+     */
 	triangle bitmap_cell_triangle(bitmap src,const point_2d &pt, const point_2d &pt1, const point_2d &pt3);
 }
 #endif /* images_h */

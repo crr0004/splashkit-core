@@ -476,13 +476,53 @@ namespace splashkit_lib
      */
     bool bitmap_collision(bitmap bmp1, double x1, double y1, bitmap bmp2, double x2, double y2);
 	
+    /**
+     * Check if bitmap and triangle collide.
+     *
+     * @param  bmp   The first bitmap
+     * @param  pt    The point to translate around
+     * @param  t     The triangle to check against
+     * @return       True if pixels in the bitmap and triangle collide/overlap
+     *
+     * @attribute static bitmap
+     * @attribute method bitmap_triangle_collision
+     */
 		bool bitmap_triangle_collision(bitmap bmp, const point_2d& pt, const triangle& t);
 
+    /**
+     * Check if spriate and triangle collide.
+     *
+     * @param  s     The sprite to check against
+     * @param  t     The triangle to check against
+     * @return       True if sprite and triangle overlap
+     *
+     * @attribute static sprite
+     * @attribute method sprite_triangle_collision
+     */
     bool sprite_triangle_collision(sprite s, const triangle& t);
 
+    /**
+     * Check if triangles collide.
+     *
+     * @param  t1     The triangle to check against
+     * @param  t2     The triangle to check against
+     * @return        True if triangles overlap
+     *
+     * @attribute static collision
+     * @attribute method triangle_collision
+     */
 		bool triangle_collision(const triangle& t1,const triangle& t2);
 
-    //collision between 2 circles
+    /**
+     * Check if circles collide.
+     *
+     * @param  circ1   The first circle
+     * @param  circ2   The second circle
+     * @return         True if cirlces overlap
+     *
+     * @attribute static collision
+     * @attribute method circle_collision
+     */
     bool circle_collision(const circle& circ1, const circle& circ2);
 
 }

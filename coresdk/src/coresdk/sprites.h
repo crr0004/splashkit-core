@@ -1869,6 +1869,15 @@ namespace splashkit_lib
      */
     string current_sprite_pack();
 	
+    /**
+     * Create a triangle around the sprite.
+     * 
+     * @param s sprite to create triangle around
+     * @returns the triangle from the sprite
+     * 
+     * @attribute static sprite
+     * @attribute method sprite_collision_triangle
+     */
 	triangle sprite_collision_triangle(sprite s);
 }
 #endif /* sprites_h */
