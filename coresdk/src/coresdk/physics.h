@@ -19,6 +19,10 @@
 
 #include "box2d/box2d.h"
 
+#ifndef M_PI
+// For some reason this isn't defined on windows
+#define M_PI 3.1415926535897932384626433832795
+#endif
 
 namespace splashkit_lib
 {
